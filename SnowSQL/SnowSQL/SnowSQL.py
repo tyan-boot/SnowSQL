@@ -90,9 +90,6 @@ class SnowSQLBase(object):
         pass
 
     def delete(self, table, where=None):
-        content = None
-        where_sql = ""
-
         if type(where) is not dict:
             raise TypeError("Not a dict")
         else:

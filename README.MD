@@ -10,7 +10,7 @@
 #Get Started
 
 ##Connect to database
-```python
+``` python
 
 # for mysql
 

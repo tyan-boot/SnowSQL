@@ -18,7 +18,7 @@ setup(
     author_email='tyanboot@outlook.com',
     url='https://github.com/tyan-boot/SnowSQL',
     packages=['SnowSQL_Sqlite'],
-    install_requires = [
+    install_requires=[
         "SnowSQL >= 0.1.1",
     ]
 )
@@ -31,7 +31,7 @@ setup(
     author_email='tyanboot@outlook.com',
     url='https://github.com/tyan-boot/SnowSQL',
     packages=['SnowSQL_Mysql'],
-    install_requires = [
+    install_requires=[
         "SnowSQL >= 0.1.1",
         "pymysql"
     ]

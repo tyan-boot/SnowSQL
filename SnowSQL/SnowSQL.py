@@ -24,8 +24,10 @@ class SnowSQLBase(object):
         self.placeholder = ""
         if self.__type == "sqlite":
             self.placeholder = "?"
+            self.escape = ''
         elif self.__type == "mysql":
             self.placeholder = "%s"
+            self.escape = '`'
 
         # prepare regex
         self.__re_compare_symbol = re.compile("""([\w\.\-]+)(\[(<|>|!=|>=|<=)\])?""")
@@ -37,7 +39,7 @@ class SnowSQLBase(object):
             __where = self.__where_case(where)
             where_sql = __where[0]
             content += __where[1]
-        column_sql = ",".join(columns)
+        column_sql = ",".join(self.__column_escape(columns))
 
         select_sql = """SELECT %s FROM %s %s""" % (column_sql, table, where_sql)
         # print(select_sql)
@@ -55,7 +57,7 @@ class SnowSQLBase(object):
                 values.append(val)
 
             value_sql = "VALUE (" + ",".join([self.placeholder for x in range(0, len(column))]) + ")"
-            column_sql = "(" + ",".join(column) + ") "
+            column_sql = "(" + ",".join(self.__column_escape(column)) + ") "
 
             insert_sql = """INSERT INTO %s""" % table + column_sql + value_sql
             return insert_sql, tuple(values)
@@ -68,7 +70,7 @@ class SnowSQLBase(object):
             raise TypeError("Not a dict")
         else:
             for col, val in data.items():
-                set_sql = " %s=%s" % (col, self.placeholder)
+                set_sql = " %s=%s" % (self.__column_escape(col), self.placeholder)
                 sets.append(set_sql)
                 values.append(val)
                 # print(sets)
@@ -80,6 +82,16 @@ class SnowSQLBase(object):
             return "UPDATE %s SET" % table + set_case + " " + where_sql, tuple(values)
 
         pass
+
+    def delete(self, table, where=None):
+        content = None
+        where_sql = ""
+
+        if type(where) is not dict:
+            raise TypeError("Not a dict")
+        else:
+            where_sql, content = self.__where_case(where)
+            return "DELETE FROM %s " % table + where_sql, content
 
     def has(self, table, where=None):
         sql, content = self.select_context(table, '*', where)
@@ -118,7 +130,7 @@ class SnowSQLBase(object):
                     content = content + part[1]
                 else:
                     tmp = self.__compare_parse(key)
-                    where_sql = "%s%s%s" % (tmp[0], tmp[1], self.placeholder)
+                    where_sql = "%s%s%s" % (self.__column_escape(tmp[0]), tmp[1], self.placeholder)
                     tmp = self.__case_parse(val, None)
                     if type(tmp) is list:
                         content = content + tmp
@@ -152,15 +164,18 @@ class SnowSQLBase(object):
 
                 (col_name, compare_symbol) = self.__compare_parse(case_key)
                 if in_list is None:
-                    case_list.append("%s%s%s" % (col_name, compare_symbol, self.placeholder))
-                    content.append(case_val)
+                    if case_val is "NULL" or case_val is "null":
+                        case_list.append("%s%sNULL" % (self.__column_escape(col_name), compare_symbol))
+                    else:
+                        case_list.append("%s%s%s" % (self.__column_escape(col_name), compare_symbol, self.placeholder))
+                        content.append(case_val)
                 else:
                     # build placeholder in ()
                     placeholders = ((self.placeholder + ",") * len(case_val))[:-1]
                     if compare_symbol == "!=":
-                        case_list.append("%s NOT IN (%s)" % (col_name, placeholders))
+                        case_list.append("%s NOT IN (%s)" % (self.__column_escape(col_name), placeholders))
                     else:
-                        case_list.append("%s IN (%s)" % (col_name, placeholders))
+                        case_list.append("%s IN (%s)" % (self.__column_escape(col_name), placeholders))
 
             where_sql = (" " + connector + " ").join(case_list)
             return where_sql, content
@@ -185,3 +200,12 @@ class SnowSQLBase(object):
                     compare_symbol = "="
 
             return col_name, compare_symbol
+
+    def __column_escape(self, columns):
+        if type(columns) is list:
+            columns_escaped = []
+            for col in columns:
+                columns_escaped.append("%s%s%s" % (self.escape, col, self.escape))
+            return columns_escaped
+        else:
+            return "%s%s%s" % (self.escape, columns, self.escape)

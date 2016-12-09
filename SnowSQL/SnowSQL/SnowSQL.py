@@ -46,7 +46,7 @@ class SnowSQLBase(object):
                 column_sql = self.__column_escape(columns)
             else:
                 column_sql = "*"
-        
+
         select_sql = """SELECT %s FROM %s %s""" % (column_sql, table, where_sql)
         # print(select_sql)
         return select_sql, tuple(content)
@@ -135,14 +135,22 @@ class SnowSQLBase(object):
                     where_sql = where_sql + " " + part[0]
                     content = content + part[1]
                 else:
-                    tmp = self.__compare_parse(key)
-                    where_sql = "%s%s%s" % (self.__column_escape(tmp[0]), tmp[1], self.placeholder)
-                    tmp = self.__case_parse(val, None)
-                    if type(tmp) is list:
-                        content = content + tmp
+                    col_name, compare_symbol = self.__compare_parse(key)
+
+                    if type(val) is list:
+                        placeholders = ((self.placeholder + ",") * len(val))[:-1]
+                        if compare_symbol == "!=":
+                            where_sql = "%s NOT IN (%s)" % (self.__column_escape(col_name), placeholders)
+                        else:
+                            where_sql = "%s IN (%s)" % (self.__column_escape(col_name), placeholders)
+                        content += val
                     else:
-                        content.append(tmp)
-            return "WHERE " + where_sql + limit_sql, content
+                        where_sql = "%s%s%s" % (self.__column_escape(col_name), compare_symbol, self.placeholder)
+                        content.append(val)
+            if where_sql == "":
+                return limit_sql, content
+            else:
+                return "WHERE " + where_sql + limit_sql, content
 
     def __case_parse(self, case, connector, content=None):
         if content is None:

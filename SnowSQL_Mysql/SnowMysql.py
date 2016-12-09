@@ -54,8 +54,9 @@ class SnowSQL(SnowSQLBase):
         sql, content = super(SnowSQL, self).update(table, data, where)
         return self.__exec(sql, content)
 
-    def delete(self, table, where):
-        pass
+    def delete(self, table, where=None):
+        sql, content = super(SnowSQL, self).delete(table, where)
+        return self.__exec_one(sql, content)
 
     def get(self, table, columns, where=None):
         sql, content = super(SnowSQL, self).select_context(table, columns, where)

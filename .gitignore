@@ -1,0 +1,11 @@
+/.idea/
+/SnowSQL/SnowSQL.egg-info/
+/SnowSQL/build/
+/SnowSQL/dist/
+/SnowSQL_Mysql/SnowSQL_Mysql.egg-info/
+/SnowSQL_Sqlite/build/
+/SnowSQL_Mysql/build/
+/SnowSQL_Mysql/dist/
+/dist/
+/SnowSQL_Sqlite/SnowSQL_Sqlite.egg-info/
+/SnowSQL_Sqlite/dist/

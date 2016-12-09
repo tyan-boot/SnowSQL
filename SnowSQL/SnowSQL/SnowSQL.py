@@ -39,8 +39,14 @@ class SnowSQLBase(object):
             __where = self.__where_case(where)
             where_sql = __where[0]
             content += __where[1]
-        column_sql = ",".join(self.__column_escape(columns))
-
+        if type(columns) is list:
+            column_sql = ",".join(self.__column_escape(columns))
+        else:
+            if columns != "*":
+                column_sql = self.__column_escape(columns)
+            else:
+                column_sql = "*"
+        
         select_sql = """SELECT %s FROM %s %s""" % (column_sql, table, where_sql)
         # print(select_sql)
         return select_sql, tuple(content)

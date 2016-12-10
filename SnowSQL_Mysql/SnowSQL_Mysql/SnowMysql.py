@@ -70,10 +70,10 @@ class SnowSQL(SnowSQLBase):
         else:
             return True
 
-    def count(self, table, where=None):
-        sql, content = super(SnowSQL, self).count(table, where)
-        result = self.__exec(sql, content)
-        return len(result)
+    def count(self, table):
+        sql = super(SnowSQL, self).count(table)
+        result = self.__exec(sql, None)
+        return result[0]["count"]
 
     def query(self, sql, content):
         return self.__exec(sql, content)

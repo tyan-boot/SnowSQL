@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='SnowSQL-Mysql',
-    version='0.1.1',
+    version='0.1.2',
     description='Python light database framework for mysql',
     author='Tyan Boot',
     author_email='tyanboot@outlook.com',
@@ -10,7 +10,7 @@ setup(
     packages=['SnowSQL_Mysql'],
     keywords='database sql framework',
     install_requires=[
-        "SnowSQL >= 0.1.1",
+        "SnowSQL >= 0.1.2",
         "pymysql"
     ]
 )

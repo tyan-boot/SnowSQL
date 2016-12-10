@@ -100,9 +100,8 @@ class SnowSQLBase(object):
         sql, content = self.select_context(table, '*', where)
         return sql, content
 
-    def count(self, table, where):
-        sql, content = self.select_context(table, '*', where)
-        return sql, content
+    def count(self, table):
+        return "SELECT COUNT(*) AS count FROM %s" % table
 
     """
         build where case sql

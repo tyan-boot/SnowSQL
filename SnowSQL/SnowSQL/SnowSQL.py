@@ -62,7 +62,7 @@ class SnowSQLBase(object):
                 column.append(col)
                 values.append(val)
 
-            value_sql = "VALUE (" + ",".join([self.placeholder for x in range(0, len(column))]) + ")"
+            value_sql = "VALUES (" + ",".join([self.placeholder for x in range(0, len(column))]) + ")"
             column_sql = "(" + ",".join(self.__column_escape(column)) + ") "
 
             insert_sql = """INSERT INTO %s""" % table + column_sql + value_sql

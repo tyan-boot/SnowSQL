@@ -53,6 +53,12 @@ db.insert("table", {
 db.update("table", { "col1": 1, "col2": 2 }, where={"col3[!=]": 3})
 
 # delete
-come up soon
+db.delete("table", { "col1": 1 })
+
+# get - similar to select but return only one record
+db.get("table", ["col1", "col2"], where={ "col3[>=]": 1 })
+
+# has - return True when table contains "where", False when not
+db.has("table", where={ "col1": 1})
 
 ```

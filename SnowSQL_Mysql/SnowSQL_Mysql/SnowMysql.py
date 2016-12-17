@@ -77,3 +77,6 @@ class SnowSQL(SnowSQLBase):
 
     def query(self, sql, content):
         return self.__exec(sql, content)
+
+    def close(self):
+        self.__db_con.close()

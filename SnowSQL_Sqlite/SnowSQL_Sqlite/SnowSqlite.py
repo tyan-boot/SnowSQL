@@ -62,3 +62,6 @@ class SnowSQL(SnowSQLBase):
         sql = super(SnowSQL, self).count(table)
         result = self.__exec(sql, None)
         return result[0]["count"]
+
+    def close(self):
+        self.__db_con.close()

@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='SnowSQL-Sqlite',
-    version='0.1.2',
+    version='0.1.3',
     description='Python light database framework for sqlite',
     author='Tyan Boot',
     author_email='tyanboot@outlook.com',

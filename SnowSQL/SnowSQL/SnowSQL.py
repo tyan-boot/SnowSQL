@@ -48,7 +48,6 @@ class SnowSQLBase(object):
                 column_sql = "*"
 
         select_sql = """SELECT %s FROM %s %s""" % (column_sql, table, where_sql)
-        # print(select_sql)
         return select_sql, tuple(content)
 
     def insert(self, table, data):
@@ -79,7 +78,6 @@ class SnowSQLBase(object):
                 set_sql = " %s=%s" % (self.__column_escape(col), self.placeholder)
                 sets.append(set_sql)
                 values.append(val)
-                # print(sets)
             set_case = ",".join(sets)
 
             if where is not None:

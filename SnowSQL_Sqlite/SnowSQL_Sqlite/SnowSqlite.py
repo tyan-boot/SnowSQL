@@ -17,16 +17,14 @@ class SnowSQL(SnowSQLBase):
         self.__db_con = sqlite3.connect(file)
 
     def __exec(self, sql, content):
-        with self.__db_con.cursor() as cursor:
-            r = cursor.execute(sql, content)
-            self.__db_con.commit()
+        with self.__db_con as con:
+            r = con.execute(sql, content)
             r = r.fetchall()
         return r
 
     def __exec_one(self, sql, content):
-        with self.__db_con.cursor() as cursor:
-            r = cursor.execute(sql, content)
-            self.__db_con.commit()
+        with self.__db_con as con:
+            r = con.execute(sql, content)
             r = r.fetchone()
         return r
 

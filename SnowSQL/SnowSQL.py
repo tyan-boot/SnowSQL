@@ -3,7 +3,7 @@ import re
 from .SnowExceptions import ErrorConfig, ColumnNameError
 
 
-class SnowSQLBase(object):
+class SnowSQL(object):
     def __init__(self, *, db_config):
         self.db_config = db_config
         if type(db_config) is not dict:
@@ -11,26 +11,125 @@ class SnowSQLBase(object):
         else:
             # check type info
             if "type" in db_config:
-                if db_config["type"] == "sqlite":
-                    self.__type = "sqlite"
+                if db_config["type"] == "sqlite3":
+                    self.__type = "sqlite3"
+                    # set placeholder
+                    self.placeholder = "?"
+                    self.escape = ''
+
+                    from .Handlers import SnowSqlite
+
+                    self.__handler = SnowSqlite.Sqlite3Handler(db_config)
+
                 elif db_config["type"] == "mysql":
                     self.__type = "mysql"
+                    self.placeholder = "%s"
+                    self.escape = '`'
+
+                    from .Handlers import SnowMysql
+
+                    self.__handler = SnowMysql.MysqlHandler(db_config)
+
                 else:
                     raise TypeError("%s is not supported yet" % db_config["type"])
             else:
                 raise ErrorConfig("缺少类型")
 
-        # set placeholder
-        self.placeholder = ""
-        if self.__type == "sqlite":
-            self.placeholder = "?"
-            self.escape = ''
-        elif self.__type == "mysql":
-            self.placeholder = "%s"
-            self.escape = '`'
-
         # prepare regex
         self.__re_compare_symbol = re.compile("""([\w\.\-]+)(\[(<|>|!=|>=|<=)\])?""")
+
+        # connect to database
+        self.__handler.connector()
+
+    def select(self, table, columns, where=None):
+        """
+        select
+        :param table: the table to select, in string
+        :param columns: "*" or a list: ["col1", "col2"]
+        :param where:
+        :return: a dict list contain data
+        """
+
+        sql, content = self.select_context(table, columns, where)
+        return self.__handler.exec(sql, content)
+
+    def insert(self, table, data):
+        """
+        insert
+        :param table: the table to insert, in string
+        :param data: data, in dict
+        :return:
+        """
+        sql, content = self.__insert(table, data)
+        return self.__handler.exec(sql, content)
+
+    def update(self, table, data, where=None):
+        """
+        update
+        :param table: the table to update
+        :param data: date, in dict
+        :param where:
+        :return:
+        """
+        sql, content = self.__update(table, data, where)
+        return self.__handler.exec(sql, content)
+
+    def delete(self, table, where=None):
+        """
+        delete
+        :param table: the table to delete
+        :param where:
+        :return:
+        """
+        sql, content = self.__delete(table, where)
+        return self.__handler.exec_one(sql, content)
+
+    def get(self, table, columns, where=None):
+        """
+        get single data instead of select all
+        :param table: the table to get
+        :param columns: "*" or list, same as select
+        :param where:
+        :return: a dict
+        """
+        sql, content = self.select_context(table, columns, where)
+        return self.__handler.exec_one(sql, content)
+
+    def has(self, table, where=None):
+        """
+        where a table contains something filter by where
+        :param table: the table to find
+        :param where:
+        :return: boolean
+        """
+        sql, content = self.__has(table, where=where)
+        result = self.__handler.exec_one(sql, content)
+        if result is None:
+            return False
+        else:
+            return True
+
+    def count(self, table):
+        """
+        count
+        :param table: the table to count
+        :return: amount in int
+        """
+        sql = self.__count(table)
+        result = self.__handler.exec_one(sql, None)
+        if self.__type == "mysql":
+            return result["count"]
+        elif self.__type == "sqlite3":
+            return result[0]
+
+    def query(self, sql, content=None):
+        """
+        execute a raw sql
+        :param sql: sql with placeholder
+        :param content: tuple to fit placeholder
+        :return: mixed
+        """
+        return self.__handler.exec(sql, content)
 
     def select_context(self, table, columns, where=None):
         content = []
@@ -50,7 +149,7 @@ class SnowSQLBase(object):
         select_sql = """SELECT %s FROM %s %s""" % (column_sql, table, where_sql)
         return select_sql, tuple(content)
 
-    def insert(self, table, data):
+    def __insert(self, table, data):
         column = []
         values = []
 
@@ -67,7 +166,7 @@ class SnowSQLBase(object):
             insert_sql = """INSERT INTO %s""" % table + column_sql + value_sql
             return insert_sql, tuple(values)
 
-    def update(self, table, data, where=None):
+    def __update(self, table, data, where=None):
         sets = []
         values = []
         where_sql = ""
@@ -87,19 +186,23 @@ class SnowSQLBase(object):
 
         pass
 
-    def delete(self, table, where=None):
+    def __delete(self, table, where=None):
         if type(where) is not dict:
             raise TypeError("Not a dict")
         else:
             where_sql, content = self.__where_case(where)
             return "DELETE FROM %s " % table + where_sql, content
 
-    def has(self, table, where=None):
+    def __has(self, table, where=None):
         sql, content = self.select_context(table, '*', where)
         return sql, content
 
-    def count(self, table):
+    def __count(self, table):
         return "SELECT COUNT(*) AS count FROM %s" % table
+
+    @property
+    def tables(self):
+        return self.__handler.tables
 
     """
         build where case sql

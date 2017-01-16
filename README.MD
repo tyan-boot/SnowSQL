@@ -2,7 +2,7 @@
 > Light Python database framework
 
 # Features
-* **Light** - only 20KB
+* **Light** - only 40KB
 * **Easy** - easy to learn and use
 * **Compatible** - support Sqlite3 and Mysql/MariaDB
 * **Security** - Prevent SQL injection
@@ -12,11 +12,13 @@
 ##Connect to database
 ``` python
 
-# for mysql
+from SnowSQL import SnowSQL
 
-from SnowSQL_Mysql import SnowSQL
+# for mysql
+# You must install pymysql first
 
 db = SnowSQL(db_config={
+     "type": "mysql"
      "host": "localhost",
      "user": "root",
      "password": "root",
@@ -26,9 +28,8 @@ db = SnowSQL(db_config={
 
 # for sqlite3
 
-from SnowSQL_Sqlite import SnowSQL
-
 db = SnowSQL(db_config={
+      "type": "sqlite3"
       "db_file": "sqlite3.db"
 })
 
@@ -60,5 +61,11 @@ db.get("table", ["col1", "col2"], where={ "col3[>=]": 1 })
 
 # has - return True when table contains "where", False when not
 db.has("table", where={ "col1": 1})
+
+# count
+db.count("table")
+
+# tables - get all tables name in database, in list format
+tables = db.tables
 
 ```

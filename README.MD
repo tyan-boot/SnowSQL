@@ -7,9 +7,16 @@
 * **Compatible** - support Sqlite3 and Mysql/MariaDB
 * **Security** - Prevent SQL injection
 
-#Get Started
+# Get Started
 
-##Connect to database
+## Install
+``` shell
+./setup.py bdist_wheel
+cd dist
+pip install *
+```
+
+## Connect to database
 ``` python
 
 from SnowSQL import SnowSQL

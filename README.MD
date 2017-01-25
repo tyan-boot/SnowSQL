@@ -10,6 +10,7 @@
 # Get Started
 
 ## Install
+SnowSQL is developing and not fully finished, so you should install by youself.
 ``` shell
 ./setup.py bdist_wheel
 cd dist
@@ -76,3 +77,129 @@ db.count("table")
 tables = db.tables
 
 ```
+
+# WHERE Syntax
+## Basic
+> WHERE is provided in dict, and it is easy to understand.
+
+``` python
+{
+    "col1": "itsval"
+}
+# WHERE col1="itsval"
+
+{
+    "col1[>]": 1
+}
+# WHERE col1 >  1
+
+{
+    "col1[>=]": 1
+}
+# WHERE col1 >= 1
+
+{
+    "col1[!=]": 4
+}
+# WHERE col1 != 4
+
+{
+    "col1": [1, 2, 3]
+}
+# WHERE col1 IN (1, 2, 3)
+
+{
+    "col1[!=]": [1, 2, 3]
+}
+# WHERE col1 NOT IN (1, 2, 3)
+
+```
+
+## Relativity Syntax
+
+``` python
+{
+    "AND": {
+        "col1": 1,
+        "col2": 2
+    }
+}
+# WHERE col1 = 1 AND col2 = 2
+
+{
+    "OR":{
+        "col1": 1,
+        "col2": 2
+    }
+}
+# WHERE col1 = 1 OR col2 =2
+
+{
+    "AND": {
+        "OR": {
+            "col1": 1,
+            "col2": 2
+        },
+        "OR": {
+            "col3": 3,
+            "col4": 4
+        }
+    }
+}
+# WHERE (col1 = 1 OR col2 = 2) AND (col3 = 3 OR col4 = 4)
+
+{
+    "OR": {
+        "AND": {
+            "col1": 1,
+            "col2": 2
+        },
+        "AND": {
+            "col3": 3,
+            "col4": 4
+        }
+    }
+}
+# WHERE (col1 = 1 AND col2 = 2) OR (col3 = 3 AND col4 = 4)
+
+{
+    "OR": {
+        "AND": {
+            "col1": 1,
+            "col2": 2
+        },
+        "OR": {
+            "col3": 3,
+            "col4": 4
+        }
+    }
+}
+# WHERE (col1 = 1 AND col2 = 2) OR (col3 = 3 OR col4 = 4)
+```
+
+## Other Syntax
+``` python
+{
+    "LIMIT": 10
+}
+# LIMIT 10
+
+{
+    "LIMIT": [3, 10]
+}
+# LIMIT 3, 10
+```
+
+# TODO
+* JOIN Syntax
+* ORDER
+* GROUP
+* LIKE
+* MATCH
+* SQL Functions
+* Many execute
+* Transaction
+
+# Thanks
+Inspired by Medoo
+[medoo](http://medoo.in)
